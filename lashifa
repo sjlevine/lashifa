@@ -5,6 +5,7 @@ import os
 sys.path.append('/usr/share/terminator')
 import json
 import argparse
+import threading, time
 
 
 # Parse commandline options
@@ -50,12 +51,18 @@ from terminatorlib.version import APP_NAME, APP_VERSION
 from terminatorlib.util import dbg, err
 
 
+def delayed_feed(terminal, text, delay=0.01):
+    def f():
+        time.sleep(delay)
+        print text
+        terminal.feed(text)
+    th = threading.Thread(target=f)
+    th.start()
+
 def execute_on_terminal(d, terminal):
-    print d['type']
     if d['type'] == 'terminal':
-        terminal.feed(d['cmd'])
-        if not d['wait']:
-            terminal.feed("\n")
+        text = d['cmd'] + ("\n" if not d['wait'] else "")
+        terminal.feed(text)
 
     elif d['type'] == 'horizontal-split':
         terminal.get_parent().split_vert(terminal)
@@ -94,7 +101,6 @@ if __name__ == '__main__':
     terminator = TERMINATOR
     window = TERMINATOR.windows[0]
 
-    print dat
 
     """
     t1 = window.get_children()[0]
@@ -113,8 +119,6 @@ if __name__ == '__main__':
     t0 = window.get_children()[0]
     execute_on_terminal(dat, t0)
     #import IPython; IPython.embed()
-
-
 
     try:
         gtk.main()
