@@ -1,0 +1,1 @@
+{"type":"vertical-split","child1":{"type":"terminal","cmd":"Sarah","wait":false},"child2":{"type":"horizontal-split","child1":{"type":"terminal","cmd":"Steve","wait":false},"child2":{"type":"terminal","cmd":"Snickerdoodlewich","wait":false}}}

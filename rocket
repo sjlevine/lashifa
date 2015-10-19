@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+import sys
+import os
+sys.path.append('/usr/share/terminator')
+import json
+import argparse
+
+
+# Parse commandline options
+parser = argparse.ArgumentParser(prog="rocket", description='Launch terminals quickly.')
+parser.add_argument('launchfile', type=str, help="A JSON file specification of the terminals to launch")
+args = parser.parse_args()
+
+# Now, attempt to open the file and read JSON data
+try:
+    with open(args.launchfile, 'r') as f:
+        dat = json.load(f)
+except:
+    print("Couldn't read launchfile!")
+    sys.exit(1)
+
+
+try:
+    ORIGCWD = os.getcwd()
+except OSError:
+    ORIGCWD = os.path.expanduser("~")
+
+# Check we have simple basics like Gtk+ and a valid $DISPLAY
+try:
+    import pygtk
+    pygtk.require ("2.0")
+    # pylint: disable-msg=W0611
+    import gtk, pango, gobject
+
+    if gtk.gdk.display_get_default() == None:
+        print('You need to run terminator in an X environment. ' \
+              'Make sure $DISPLAY is properly set')
+        sys.exit(1)
+
+except ImportError:
+    print('You need to install the python bindings for ' \
+           'gobject, gtk and pango to run Terminator.')
+    sys.exit(1)
+
+import terminatorlib.optionparse
+from terminatorlib.terminator import Terminator
+from terminatorlib.factory import Factory
+from terminatorlib.version import APP_NAME, APP_VERSION
+from terminatorlib.util import dbg, err
+
+
+def execute_on_terminal(d, terminal):
+    print d['type']
+    if d['type'] == 'terminal':
+        terminal.feed(d['cmd'])
+        if not d['wait']:
+            terminal.feed("\n")
+
+    elif d['type'] == 'horizontal-split':
+        terminal.get_parent().split_vert(terminal)
+        p = terminal.get_parent() # New parent
+        terminal_2 = p.get_children()[1]
+        execute_on_terminal(d['child1'], terminal)
+        execute_on_terminal(d['child2'], terminal_2)
+
+    elif d['type'] == 'vertical-split':
+        terminal.get_parent().split_horiz(terminal)
+        p = terminal.get_parent() # New parent
+        terminal_2 = p.get_children()[1]
+        execute_on_terminal(d['child1'], terminal)
+        execute_on_terminal(d['child2'], terminal_2)
+
+
+if __name__ == '__main__':
+    dbus_service = None
+
+    dbg ("%s starting up, version %s" % (APP_NAME, APP_VERSION))
+
+
+    MAKER = Factory()
+    TERMINATOR = Terminator()
+    TERMINATOR.set_origcwd(ORIGCWD)
+    TERMINATOR.set_dbus_data(dbus_service)
+    TERMINATOR.reconfigure()
+
+    TERMINATOR.new_window()
+    TERMINATOR.layout_done()
+
+
+    """
+    Steve's stuff here!
+    """
+    terminator = TERMINATOR
+    window = TERMINATOR.windows[0]
+
+    print dat
+
+    """
+    t1 = window.get_children()[0]
+    window.split_vert(t1)
+    hp = window.get_children()[0]
+    t2 = hp.get_child2()
+    t1.feed('T1')
+    t2.feed('T2')
+    # You can do other trickery to create new tabs!
+    window.tab_new()
+    notebook = window.get_child()
+    t3 = notebook.get_children()[1]
+    t3.feed('T3')
+    """
+
+    t0 = window.get_children()[0]
+    execute_on_terminal(dat, t0)
+    #import IPython; IPython.embed()
+
+
+
+    try:
+        gtk.main()
+    except KeyboardInterrupt:
+        pass
