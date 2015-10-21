@@ -50,19 +50,25 @@ from terminatorlib.factory import Factory
 from terminatorlib.version import APP_NAME, APP_VERSION
 from terminatorlib.util import dbg, err
 
+Q = []
 
 def delayed_feed(terminal, text, delay=0.01):
     def f():
         time.sleep(delay)
         print text
         terminal.feed(text)
+        Q.remove(threading.current_thread())
+        #gtk.main_iteration(block=False)
+
     th = threading.Thread(target=f)
+    Q.append(th)
     th.start()
 
 def execute_on_terminal(d, terminal):
     if d['type'] == 'terminal':
         text = d['cmd'] + ("\n" if not d['wait'] else "")
-        terminal.feed(text)
+        #terminal.feed(text)
+        delayed_feed(terminal, text, delay=0.2)
 
     elif d['type'] == 'horizontal-split':
         terminal.get_parent().split_vert(terminal)
@@ -119,6 +125,10 @@ if __name__ == '__main__':
     t0 = window.get_children()[0]
     execute_on_terminal(dat, t0)
     #import IPython; IPython.embed()
+
+    # Wait until everything has been entered
+    while len(Q) != 0:
+        time.sleep(0.01)
 
     try:
         gtk.main()

@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Rocket Editor</title>
+    <title>Lashifa! Terminal Layout Editor</title>
     <!-- Favicon! -->
     <!-- link rel="icon" type="image/png" href="runner_icon.png" -->
 		<link rel="stylesheet" href="libs/jquery-ui-1.11.4/jquery-ui.css">
@@ -21,6 +21,7 @@
 
     <!-- Bootstrap -->
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
+		<script src="libs/bootstrap/js/tabs.js"></script>
 
     <!-- Download files easily - https://github.com/eligrey/FileSaver.js/ -->
     <script src="libs/FileSaver.js/FileSaver.js"></script>
@@ -56,7 +57,7 @@
 
 		.main {
 			width: 100%;
-			height: 100%;
+			height: calc(100% - 42px);
 		}
 
 		.root {
@@ -193,6 +194,21 @@
 		    width: 15px;
 		}
 
+		.tab-button {
+			margin-left: 6px;
+			padding-left: 6px;
+			border-left: solid 1px #cccccc;
+			cursor: pointer;
+		}
+
+		.tab-button:hover {
+			color: black;
+		}
+
+		.tab-title:hover {
+			color: black;
+			cursor: pointer;
+		}
 
     </style>
 
@@ -211,12 +227,16 @@
 				// });
 
 				var pane = addPane($('#root'));
+
+				createTab();
+
 				$('#terminal-modal').on('shown.bs.modal', function() {
 					$('#terminal-command-textbox').select();
 					$('#terminal-command-textbox').focus();
 				});
 
 				$('#menubar-save').on('click', menubar_save_handler);
+
 
       }
 
@@ -385,6 +405,25 @@
 				pane.append(menu);
 			}
 
+
+			function createTab() {
+				var name = 'Tab i';
+				var tab = $('<li role="presentation" class="active"></a></li>');
+				var a = $('<a href="#"></a>');
+				var title = $('<span class="tab-title">' + name + ' </span>');
+				var tab_edit = $('<span class="tab-button"><i class="fa fa-lg fa-pencil"></i></span>');
+				var tab_del = $('<span class="tab-button"><i class="fa fa-lg fa-times-circle"></i></span>');
+				a.append(title);
+				a.append(tab_edit);
+				a.append(tab_del);
+				tab.append(a);
+
+				$('#tabs').prepend(tab);
+
+
+			}
+
+
 			function getJSONRepresentation() {
 				return paneToJSON($($('#root').children()[0]))
 			}
@@ -451,7 +490,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">lashifa <i class="fa fa-rocket"></i></a>
+      <a class="navbar-brand" href="#">lashifa! <i class="fa fa-rocket"></i></a>
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -501,8 +540,16 @@
 </div>
 
 
+
 <div class="main">
+	<ul id="tabs" class="nav nav-tabs" role="tablist">
+		<li role="presentation"><a href="#"><i class="fa fa-lg fa-plus-square-o"></i></a></li>
+	</ul>
 	<div id="root" class="root">
+
+	</div>
+	<div id="root" class="root2">
+
 	</div>
 </div>
 
