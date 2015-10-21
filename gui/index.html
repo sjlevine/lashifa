@@ -112,6 +112,7 @@
 			margin-left: -120px;
 
 			transition: 0.2s ease;
+			font-family: sans-serif;
 		}
 
 		.button {
@@ -359,6 +360,24 @@
 				vb.on('click', generateVerticalSplitFn(pane));
 				tb.on('click', generateTerminalFn(pane));
 				xb.on('click', generateDeleteFn(pane));
+
+				hb.tooltip({
+					title: 'Divide into columns',
+					delay: 500,
+				});
+				vb.tooltip({
+					title: 'Divide into rows',
+					delay: 500,
+				});
+				tb.tooltip({
+					title: 'Edit terminal...',
+					delay: 500,
+				});
+				xb.tooltip({
+					title: 'Remove terminal',
+					delay: 500,
+				});
+
 				menu.append(hb);
 				menu.append(vb);
 				menu.append(tb);
