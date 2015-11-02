@@ -9,7 +9,7 @@ import threading, time
 
 
 # Parse commandline options
-parser = argparse.ArgumentParser(prog="rocket", description='Launch terminals quickly.')
+parser = argparse.ArgumentParser(prog="lashifa", description='Launch shell instances fast.')
 parser.add_argument('launchfile', type=str, help="A JSON file specification of the terminals to launch")
 args = parser.parse_args()
 
@@ -89,6 +89,8 @@ def load_terminals(d, window):
             terminal = notebook.get_children()[i]
             tablabel = notebook.get_tab_label(terminal)
             tablabel.set_custom_label(tab_children[i]['name'])
+        # Show the first tab
+        window.tab_change(window, num=0)
 
 
 def execute_on_terminal(d, terminal):
