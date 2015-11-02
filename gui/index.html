@@ -585,11 +585,12 @@
 					// Do for all children!
 					var children = obj.children();
 					var L = [];
-					for (var i = 0; i < obj.length; i++) {
+					for (var i = 0; i < children.length; i++) {
 						L.push(paneToJSON($(children[i])));
 					}
 					return {
 						type: "root",
+						version: "0.9",
 						children: L
 					};
 				}

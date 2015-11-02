@@ -1,1 +1,1 @@
-{"type":"horizontal-split","child1":{"type":"terminal","cmd":"Terminal 1","wait":true},"child2":{"type":"vertical-split","child1":{"type":"terminal","cmd":"Terminal 2","wait":true},"child2":{"type":"terminal","cmd":"Terminal 3","wait":true}}}
+{"type":"root","version":"0.9","children":[{"type":"tab","id":"doy4h73jtq4onp0t","name":"Tab 0","child":{"type":"terminal","cmd":"test","wait":true}}]}

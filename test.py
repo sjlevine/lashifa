@@ -113,6 +113,22 @@ if __name__ == '__main__':
 
     hp = window.get_children()[0]
 
+    # Resizing tabs:
+    # divider_x = hp.get_position()
+    # hp.set_position(divider_x)
+    # width = hp.get_length()
+    # window.tab_change(window, num=1)
+
+    # Renaming tabs:
+
+
+    # tl = notebook.get_tab_label(notebook.get_children()[i]) i = 0, 1, ...
+    # tl.label.set_custom()
+    # tl.label.set_text('Hi there')
+    # or even better:
+    # tl.set_custom_label('Hi there')
+
+
     t2 = hp.get_child2()
 
     t1.feed('T1')
