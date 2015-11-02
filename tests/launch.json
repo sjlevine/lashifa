@@ -1,1 +1,1 @@
-{"type":"root","version":"0.9","children":[{"type":"tab","id":"doy4h73jtq4onp0t","name":"Tab 0","child":{"type":"terminal","cmd":"test","wait":true}}]}
+{"type":"root","version":"0.9","children":[{"type":"tab","id":"4wmhryh7mewogarl","name":"Tab 0","child":{"type":"horizontal-split","child1":{"type":"terminal","cmd":"T1","wait":true},"child2":{"type":"terminal","cmd":"T2","wait":true}}},{"type":"tab","id":"[object Object]","name":"Tab 1","child":{"type":"vertical-split","child1":{"type":"terminal","cmd":"T3","wait":true},"child2":{"type":"terminal","cmd":"T4","wait":true}}}]}

@@ -216,6 +216,11 @@
 			cursor: pointer;
 		}
 
+		#file-input {
+			display: none;
+		}
+
+
     </style>
 
     <script type="text/javascript">
@@ -237,14 +242,8 @@
 				current_tab = null;
 				createTab();
 
-
-
 				// Set up the new tab button
 				$('#tabs-adder').on('click', createTab);
-
-
-
-
 
 				$('#terminal-modal').on('shown.bs.modal', function() {
 					$('#terminal-command-textbox').select();
@@ -257,13 +256,18 @@
 				});
 
 				$('#menubar-save').on('click', menubar_save_handler);
+				$('#menubar-new').on('click', menubar_new_handler);
+				$('#file-input').on('change', menubar_open_handler);
+				$('#menubar-open').on('click', function () {
+					$('#file-input').click();
+				});
 
 
       }
 
 			function addPane(obj) {
 				var pane = $('<div class="pane"><span class="prompt">$ </span> <span class="command-label"></span></div>');
-				pane.attr('data-cmd', "");
+				pane.attr('data-cmd', '');
 				pane.attr('data-runit', true);
 
 				createButtonMenu(pane);
@@ -291,7 +295,11 @@
 				hs.append(c2);
 				parent.append(hs);
 				c1.append(pane);
-				addPane(c2);
+				var pane2 = addPane(c2);
+				return {
+					child1: pane,
+					child2: pane2
+				};
 			}
 
 
@@ -315,8 +323,11 @@
 				hs.append(c2);
 				parent.append(hs);
 				c1.append(pane);
-				addPane(c2);
-
+				var pane2 = addPane(c2);
+				return {
+					child1: pane,
+					child2: pane2
+				};
 			}
 
 			/* Delete the given pane */
@@ -377,9 +388,7 @@
 						var cmd = $('#terminal-command-textbox').val();
 						var runit = $('#terminal-runit-checkbox')[0].checked;
 
-						pane.attr('data-cmd', cmd);
-						pane.attr('data-runit', runit);
-						pane.children(".command-label").text(cmd);
+						update_terminal(pane, cmd, runit);
 						//console.log(cmd + ", " + runit);
 						$('#terminal-submit-button').off('click');
 					});
@@ -388,6 +397,14 @@
 					$('#terminal-command-textbox').val(pane.attr('data-cmd'));
 					$('#terminal-runit-checkbox')[0].checked = (pane.attr('data-runit') == "true");
 				}
+			}
+
+
+			function update_terminal(pane, cmd, runit) {
+				/* Helper function to update a terminal */
+				pane.attr('data-cmd', cmd);
+				pane.attr('data-runit', runit);
+				pane.children(".command-label").text(cmd);
 			}
 
 			function generateTabCloseFn(id) {
@@ -476,12 +493,12 @@
 			}
 
 
-			function createTab() {
+			function createTab(id, name) {
 				var idx = tab_list.length;
-				var id = generate_random_id();
+				var id = id ? id : generate_random_id();
 
 				// Create a tab button element
-				var name = 'Tab ' + idx;
+				var name = name ? name : ('Tab ' + idx);
 				var tab = $('<li role="presentation" class="active"></a></li>');
 				var a = $('<a href="#"></a>');
 				var title = $('<span class="tab-title">' + name + ' </span>');
@@ -498,18 +515,20 @@
 
 				// Now create the actual pane associated with this tab
 				var tab_pane = $('<div class="tab-pane" tabid="' + id + '"></div>');
+
+				// Create an initial pane within this tab
+				var pane = addPane(tab_pane);
+
+				// Create a datastructure to keep track
 				var tab_obj = {
 					id: id,
 					name: name,
 					tab: tab,
 					div: tab_pane,
-					name_span: title
+					name_span: title,
+					original_pane: pane
 				};
 				tab_list.push(tab_obj);
-
-				// Create an initial pane within this tab
-				var pane = addPane(tab_pane);
-
 
 				// Add them
 				$('#tabs-adder').before(tab);
@@ -596,6 +615,48 @@
 				}
 			}
 
+
+			function reset() {
+				current_tab = null;
+				tab_list = [];
+				$('#root').html('');
+				$('#tabs-adder').prevAll().remove()
+			}
+
+			function load_lashifa(d) {
+				// Reset everything
+				reset()
+				// Assume top level is root node
+				var tab_children = d.children;
+				// Run for each tab child
+				for(var i = 0; i < tab_children.length; i++) {
+					var tab_child = tab_children[i];
+					createTab(tab_child.id, tab_child.name);
+					apply_json_to_pane(tab_child.child, tab_list[getTabPaneIndex(current_tab)].original_pane);
+				}
+				// Show the first tab
+				showTab(tab_list[0].id);
+			}
+
+			function apply_json_to_pane(d, pane) {
+				if (d.type == 'vertical-split') {
+					var r = splitPaneVertical(pane);
+					apply_json_to_pane(d.child1, r.child1);
+					apply_json_to_pane(d.child2, r.child2);
+
+				} else if (d.type == 'horizontal-split') {
+					var r = splitPaneHorizontal(pane);
+					apply_json_to_pane(d.child1, r.child1);
+					apply_json_to_pane(d.child2, r.child2);
+
+				} else if (d.type == 'terminal') {
+					update_terminal(pane, d.cmd, d.wait);
+				} else {
+					console.error('Unknown type!');
+				}
+			}
+
+
 			function menubar_save_handler(e) {
 				console.log('Saving');
 
@@ -607,6 +668,39 @@
 				// Save it!
 				saveAs(blob, filename);
 			}
+
+
+			function menubar_new_handler(e) {
+				console.log("New");
+				reset();
+				createTab();
+			}
+
+
+			function menubar_open_handler(e) {
+        // Actually load in the given file!
+        console.log('Opening file');
+        try {
+          var file = e.target.files[0];
+          var reader = new FileReader();
+          reader.onload = function (f) {
+            try {
+              var file_data = f.target.result;
+							data = JSON.parse(file_data);
+							load_lashifa(data);
+
+            } catch (err) {
+              console.error("Couldn't open file");
+							console.error(err);
+            }
+          };
+          reader.readAsText(file);
+        } catch (err) {
+          console.err("Couldn't open the given file!");
+        }
+
+      }
+
 
       function getParameterByName(name, default_val) {
           name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -652,8 +746,8 @@
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li><a id="menubar-new" href="#" data-toggle="tooltip" title="Start a new TPN" data-placement="bottom"><i class="fa fa-file-o"></i>  New</a></li>
-        <li><a id="menubar-open" href="#" data-toggle="tooltip" title="Load TPN from a file on your computer" data-placement="bottom"><i class="fa fa-folder-open-o"></i> Open</a></li>
+        <li><a id="menubar-new" href="#" data-toggle="tooltip" title="Start a new terminal configuration" data-placement="bottom"><i class="fa fa-file-o"></i>  New</a></li>
+        <li><a id="menubar-open" href="#" data-toggle="tooltip" title="Load a configuration from your computer" data-placement="bottom"><i class="fa fa-folder-open-o"></i> Open</a></li>
         <li><a id="menubar-save" href="#"><i class="fa fa-save"></i> Save</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-bouy"></i> Help <span class="caret"></span></a>
@@ -729,6 +823,8 @@
 
 	</div>
 </div>
+
+<input type="file" id="file-input" />
 
 </body>
 
