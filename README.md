@@ -9,7 +9,6 @@ Lashifa is a tool to quickly launch lots of nicely-organized terminals. It can c
 
 Lashifa also comes with a web-based GUI for laying out your terminals.
 
-(Picture coming soon)
-
+![Screenshot](https://github.com/sjlevine/lashifa/blob/master/media/lashifa_gui.jpg?raw=true)
 
 <sup>\* Lashifa may also have a less official acronym, replacing the "shi" (**sh**ell **i**nstances) with another word of your choice.</sup>
