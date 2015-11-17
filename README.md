@@ -3,9 +3,9 @@ lashifa!
 
  **La**unch **sh**ell **i**nstances **fa**st
 
-Lashifa is a tool to quickly launch lots of nicely-organized terminals. It can create new tabs, columns, and rows, and pre-populate each of those terminals with a command of your choosing.
+Lashifa is a tool to quickly launch lots of nicely-organized terminals. It can create tabs, columns, and rows, and pre-populate each of those terminals with a command of your choosing.
 
-(Picture coming soon)
+![Screenshot](https://github.com/sjlevine/lashifa/blob/master/media/lashifa.gif?raw=true)
 
 Lashifa also comes with a web-based GUI for laying out your terminals.
 
